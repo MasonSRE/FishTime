@@ -55,7 +55,10 @@ final class AppDependencies: ObservableObject {
             repository: repository,
             posterExporter: posterExporter
         )
-        todayReportViewModel = TodayReportViewModel(repository: repository)
+        todayReportViewModel = TodayReportViewModel(
+            repository: repository,
+            settingsStore: settingsStore
+        )
         notificationService.configure { [windowRouter] in
             windowRouter.openMainWindow()
         }

@@ -15,6 +15,8 @@ struct MenuBarRootView: View {
             TodayReportView(
                 presentation: reportViewModel.presentation,
                 isCompact: true,
+                selectedTemplate: reportViewModel.selectedTemplate,
+                onSelectTemplate: reportViewModel.selectTemplate,
                 onRefreshVerdict: reportViewModel.refreshVerdict,
                 onCopy: viewModel.copyPosterToClipboard,
                 onSave: viewModel.generatePosterAndSave

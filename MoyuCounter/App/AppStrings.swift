@@ -70,8 +70,13 @@ enum AppStrings {
 
     enum Report {
         static let sectionTitle = "今日战报"
+        static let templateSectionTitle = "分享模板"
+        static let templatePickerHint = "切换模板会立即刷新预览，并用于复制与保存。"
         static let emptyTitle = "今日战报待生成"
         static let emptySubtitle = "完成日结后，这里会展示称号、毒舌判词和今日亮点。"
+        static let standardTemplate = "标准战报"
+        static let certificateTemplate = "奖状"
+        static let deskLogTemplate = "工位日报"
         static let refreshVerdict = "刷新判词"
         static let copyReport = "复制今日战报"
         static let saveReport = "保存战报图片"

@@ -20,6 +20,8 @@ struct MainWindowView: View {
 
             TodayReportView(
                 presentation: reportViewModel.presentation,
+                selectedTemplate: reportViewModel.selectedTemplate,
+                onSelectTemplate: reportViewModel.selectTemplate,
                 onRefreshVerdict: reportViewModel.refreshVerdict,
                 onCopy: menuBarViewModel.copyPosterToClipboard,
                 onSave: menuBarViewModel.generatePosterAndSave
