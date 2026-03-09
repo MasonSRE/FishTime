@@ -20,6 +20,12 @@ final class SettingsStore: ObservableObject {
         }
     }
 
+    @Published var selectedReportTemplate: ReportTemplateStyle {
+        didSet {
+            userDefaults.set(selectedReportTemplate.rawValue, forKey: Keys.selectedReportTemplate)
+        }
+    }
+
     private let userDefaults: UserDefaults
 
     init(userDefaults: UserDefaults = .standard) {
@@ -36,6 +42,13 @@ final class SettingsStore: ObservableObject {
         let defaultEnd = 18 * 60
         self.workStartMinutes = userDefaults.object(forKey: Keys.workStartMinutes) as? Int ?? defaultStart
         self.workEndMinutes = userDefaults.object(forKey: Keys.workEndMinutes) as? Int ?? defaultEnd
+
+        if let rawTemplate = userDefaults.string(forKey: Keys.selectedReportTemplate),
+           let savedTemplate = ReportTemplateStyle(rawValue: rawTemplate) {
+            self.selectedReportTemplate = savedTemplate
+        } else {
+            self.selectedReportTemplate = .standard
+        }
     }
 }
 
@@ -43,4 +56,5 @@ private enum Keys {
     static let scope = "trackingScope"
     static let workStartMinutes = "workStartMinutes"
     static let workEndMinutes = "workEndMinutes"
+    static let selectedReportTemplate = "selectedReportTemplate"
 }
