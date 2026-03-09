@@ -11,24 +11,24 @@ final class DailyReportComposer {
         self.randomIndexProvider = randomIndexProvider
     }
 
-    func makePresentation(from record: DailyRecord) -> DailyReportPresentation {
+    func makePresentation(
+        from record: DailyRecord,
+        templateStyle: ReportTemplateStyle = .standard
+    ) -> DailyReportPresentation {
         let label = DailyScoreLabel(storedValue: record.label)
         let verdictOptions = VerdictCopyLibrary.copies(for: label)
         let index = max(0, min(randomIndexProvider(label, verdictOptions.count), verdictOptions.count - 1))
-
-        let stats = [
-            DailyReportStat(label: "活跃分钟", value: "\(record.activeMinutes)"),
-            DailyReportStat(label: "最长沉寂", value: "\(record.longestIdleMinutes) 分钟"),
-            DailyReportStat(label: "统计范围", value: "\(record.trackedMinutes) 分钟"),
-        ]
+        let stats = stats(for: record, templateStyle: templateStyle)
         let dateText = record.date.formatted(.dateTime.year().month().day())
         let highlight = highlight(for: record)
         let laborScoreText = "劳动分 \(record.score)"
         let moyuScoreText = "摸鱼分 \(record.moyuScore)"
+        let title = reportTitle(for: label, templateStyle: templateStyle)
 
         return DailyReportPresentation(
             label: label,
-            title: label.reportTitle,
+            templateStyle: templateStyle,
+            title: title,
             laborScoreText: laborScoreText,
             moyuScoreText: moyuScoreText,
             verdict: verdictOptions[index],
@@ -36,7 +36,9 @@ final class DailyReportComposer {
             stats: stats,
             dateText: dateText,
             shareText: shareText(
-                title: label.reportTitle,
+                title: title,
+                label: label,
+                templateStyle: templateStyle,
                 laborScoreText: laborScoreText,
                 moyuScoreText: moyuScoreText,
                 verdict: verdictOptions[index],
@@ -75,8 +77,36 @@ final class DailyReportComposer {
         return "活跃 \(record.activeMinutes) 分钟，工作与摸鱼保持动态平衡。"
     }
 
+    private func stats(for record: DailyRecord, templateStyle: ReportTemplateStyle) -> [DailyReportStat] {
+        let activeStat = DailyReportStat(label: "活跃分钟", value: "\(record.activeMinutes)")
+        let idleStat = DailyReportStat(label: "最长沉寂", value: "\(record.longestIdleMinutes) 分钟")
+        let trackedStat = DailyReportStat(label: "统计范围", value: "\(record.trackedMinutes) 分钟")
+
+        switch templateStyle {
+        case .standard:
+            return [activeStat, idleStat, trackedStat]
+        case .certificate:
+            return [trackedStat, activeStat, idleStat]
+        case .deskLog:
+            return [idleStat, activeStat, trackedStat]
+        }
+    }
+
+    private func reportTitle(for label: DailyScoreLabel, templateStyle: ReportTemplateStyle) -> String {
+        switch templateStyle {
+        case .standard:
+            return label.reportTitle
+        case .certificate:
+            return "\(label.reportTitle)奖状"
+        case .deskLog:
+            return "\(label.reportTitle)工位日报"
+        }
+    }
+
     private func shareText(
         title: String,
+        label: DailyScoreLabel,
+        templateStyle: ReportTemplateStyle,
         laborScoreText: String,
         moyuScoreText: String,
         verdict: String,
@@ -88,8 +118,18 @@ final class DailyReportComposer {
             .map { "\($0.label)：\($0.value)" }
             .joined(separator: " · ")
 
+        let header: String
+        switch templateStyle {
+        case .standard:
+            header = "\(title) | \(laborScoreText) · \(moyuScoreText)"
+        case .certificate:
+            header = "今日奖状：\(label.reportTitle) · \(laborScoreText)"
+        case .deskLog:
+            header = "工位日报：\(label.reportTitle) · \(moyuScoreText)"
+        }
+
         return [
-            "\(title) | \(laborScoreText) · \(moyuScoreText)",
+            header,
             verdict,
             highlight,
             statText,

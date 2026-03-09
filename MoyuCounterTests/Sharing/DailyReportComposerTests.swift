@@ -16,7 +16,7 @@ final class DailyReportComposerTests: XCTestCase {
             longestIdleMinutes: 96
         )
 
-        let presentation = composer.makePresentation(from: record)
+        let presentation = composer.makePresentation(from: record, templateStyle: .standard)
 
         XCTAssertEqual(presentation.title, "摸鱼大师")
         XCTAssertEqual(presentation.laborScoreText, "劳动分 32")
@@ -24,5 +24,31 @@ final class DailyReportComposerTests: XCTestCase {
         XCTAssertFalse(presentation.verdict.isEmpty)
         XCTAssertTrue(presentation.highlight.contains("96"))
         XCTAssertEqual(presentation.stats.count, 3)
+        XCTAssertEqual(presentation.templateStyle, .standard)
+    }
+
+    func test_composer_keeps_scores_stable_across_templates_but_changes_template_specific_copy() {
+        let composer = DailyReportComposer(randomIndexProvider: { _, _ in 0 })
+        let record = DailyRecord(
+            date: Date(timeIntervalSince1970: 86_400),
+            score: 55,
+            moyuScore: 45,
+            label: DailyScoreLabel.balancedHuman.rawValue,
+            activeMinutes: 180,
+            trackedMinutes: 480,
+            highActivityMinutes: 120,
+            lowActivityMinutes: 120,
+            longestIdleMinutes: 18
+        )
+
+        let standard = composer.makePresentation(from: record, templateStyle: .standard)
+        let certificate = composer.makePresentation(from: record, templateStyle: .certificate)
+
+        XCTAssertEqual(standard.laborScoreText, certificate.laborScoreText)
+        XCTAssertEqual(standard.moyuScoreText, certificate.moyuScoreText)
+        XCTAssertEqual(standard.highlight, certificate.highlight)
+        XCTAssertEqual(certificate.templateStyle, .certificate)
+        XCTAssertNotEqual(standard.shareText, certificate.shareText)
+        XCTAssertNotEqual(standard.stats, certificate.stats)
     }
 }
