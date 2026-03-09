@@ -33,6 +33,7 @@ enum PosterExportError: Error {
 final class PosterExportService: PosterExporting {
     private let repository: DailyRecordRepository
     private let renderer: PosterRendering
+    private let settingsStore: SettingsStore
     private let composer: DailyReportComposer
     private let clipboard: ClipboardWriting
     private let exportDirectory: URL
@@ -41,6 +42,7 @@ final class PosterExportService: PosterExporting {
     init(
         repository: DailyRecordRepository,
         renderer: PosterRendering,
+        settingsStore: SettingsStore = SettingsStore(),
         composer: DailyReportComposer = DailyReportComposer(),
         clipboard: ClipboardWriting,
         exportDirectory: URL,
@@ -48,6 +50,7 @@ final class PosterExportService: PosterExporting {
     ) {
         self.repository = repository
         self.renderer = renderer
+        self.settingsStore = settingsStore
         self.composer = composer
         self.clipboard = clipboard
         self.exportDirectory = exportDirectory
@@ -85,7 +88,10 @@ final class PosterExportService: PosterExporting {
     }
 
     private func render(record: DailyRecord) throws -> RenderedReportPayload {
-        let report = composer.makePresentation(from: record)
+        let report = composer.makePresentation(
+            from: record,
+            templateStyle: settingsStore.selectedReportTemplate
+        )
         let data = try renderer.render(report: report)
         return RenderedReportPayload(data: data, report: report)
     }

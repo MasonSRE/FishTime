@@ -169,6 +169,7 @@ final class MenuBarViewModel: ObservableObject {
         return PosterExportService(
             repository: repository,
             renderer: PosterRenderer(),
+            settingsStore: SettingsStore(),
             clipboard: SystemClipboardWriter(),
             exportDirectory: exportDirectory,
             fileManager: .default

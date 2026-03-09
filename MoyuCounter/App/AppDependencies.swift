@@ -38,6 +38,7 @@ final class AppDependencies: ObservableObject {
         let posterExporter = PosterExportService(
             repository: repository,
             renderer: PosterRenderer(),
+            settingsStore: settingsStore,
             clipboard: SystemClipboardWriter(),
             exportDirectory: Self.makeAppDirectory().appendingPathComponent("exports", isDirectory: true),
             fileManager: .default

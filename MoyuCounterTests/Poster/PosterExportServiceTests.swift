@@ -6,6 +6,8 @@ final class PosterExportServiceTests: XCTestCase {
     func test_generate_and_save_latest_poster_returns_file_url() throws {
         let repository = try DailyRecordRepository.inMemory()
         try repository.save(DailyRecord(date: Date(), score: 66, label: "balancedHuman", activeMinutes: 120))
+        let settings = makeSettingsStore(testName: #function)
+        settings.selectedReportTemplate = .certificate
 
         let fileManager = FileManager.default
         let exportDirectory = fileManager.temporaryDirectory
@@ -18,6 +20,7 @@ final class PosterExportServiceTests: XCTestCase {
         let service = PosterExportService(
             repository: repository,
             renderer: renderer,
+            settingsStore: settings,
             clipboard: clipboard,
             exportDirectory: exportDirectory,
             fileManager: fileManager
@@ -27,11 +30,14 @@ final class PosterExportServiceTests: XCTestCase {
 
         XCTAssertTrue(fileManager.fileExists(atPath: url.path))
         XCTAssertEqual(try Data(contentsOf: url), Data([0xDE, 0xAD, 0xBE, 0xEF]))
+        XCTAssertEqual(renderer.lastPresentation?.templateStyle, .certificate)
     }
 
     func test_generate_and_copy_latest_poster_writes_clipboard_data() throws {
         let repository = try DailyRecordRepository.inMemory()
         try repository.save(DailyRecord(date: Date(), score: 80, label: "topNiuMa", activeMinutes: 300))
+        let settings = makeSettingsStore(testName: #function)
+        settings.selectedReportTemplate = .deskLog
 
         let renderer = StubPosterRenderer(data: Data([0xAA, 0xBB]))
         let clipboard = StubClipboardWriter()
@@ -39,6 +45,7 @@ final class PosterExportServiceTests: XCTestCase {
         let service = PosterExportService(
             repository: repository,
             renderer: renderer,
+            settingsStore: settings,
             clipboard: clipboard,
             exportDirectory: FileManager.default.temporaryDirectory,
             fileManager: .default
@@ -68,9 +75,12 @@ final class PosterExportServiceTests: XCTestCase {
         )
 
         let renderer = CapturingPosterRenderer(data: Data([0xAA]))
+        let settings = makeSettingsStore(testName: #function)
+        settings.selectedReportTemplate = .deskLog
         let service = PosterExportService(
             repository: repository,
             renderer: renderer,
+            settingsStore: settings,
             clipboard: StubClipboardWriter(),
             exportDirectory: FileManager.default.temporaryDirectory,
             fileManager: .default
@@ -78,20 +88,29 @@ final class PosterExportServiceTests: XCTestCase {
 
         try service.generateAndCopyLatestPoster()
 
-        XCTAssertEqual(renderer.lastPresentation?.title, "顶级牛马")
+        XCTAssertEqual(renderer.lastPresentation?.title, "顶级牛马工位日报")
         XCTAssertFalse(renderer.lastPresentation?.highlight.isEmpty ?? true)
+        XCTAssertEqual(renderer.lastPresentation?.templateStyle, .deskLog)
+    }
+
+    private func makeSettingsStore(testName: String) -> SettingsStore {
+        let defaults = UserDefaults(suiteName: testName)!
+        defaults.removePersistentDomain(forName: testName)
+        return SettingsStore(userDefaults: defaults)
     }
 }
 
 private final class StubPosterRenderer: PosterRendering {
     let data: Data
+    private(set) var lastPresentation: DailyReportPresentation?
 
     init(data: Data) {
         self.data = data
     }
 
     func render(report: DailyReportPresentation) throws -> Data {
-        data
+        lastPresentation = report
+        return data
     }
 }
 

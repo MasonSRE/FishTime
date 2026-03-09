@@ -67,7 +67,17 @@ final class HistoryViewModelTests: XCTestCase {
                 longestIdleMinutes: 18
             )
         )
-        let exporter = CapturingPosterExporter()
+        let settings = makeSettingsStore(testName: #function)
+        settings.selectedReportTemplate = .certificate
+        let renderer = CapturingPosterRenderer(data: Data([0xAB]))
+        let exporter = PosterExportService(
+            repository: repository,
+            renderer: renderer,
+            settingsStore: settings,
+            clipboard: StubClipboardWriter(),
+            exportDirectory: FileManager.default.temporaryDirectory,
+            fileManager: .default
+        )
         let viewModel = HistoryViewModel(
             repository: repository,
             composer: DailyReportComposer(randomIndexProvider: { _, _ in 0 }),
@@ -77,20 +87,31 @@ final class HistoryViewModelTests: XCTestCase {
         let row = try XCTUnwrap(viewModel.records.first)
         viewModel.copyReport(for: row)
 
-        XCTAssertEqual(exporter.copiedScores, [55])
+        XCTAssertEqual(renderer.lastPresentation?.templateStyle, .certificate)
+        XCTAssertEqual(renderer.lastPresentation?.title, "平衡人类奖状")
+    }
+
+    private func makeSettingsStore(testName: String) -> SettingsStore {
+        let defaults = UserDefaults(suiteName: testName)!
+        defaults.removePersistentDomain(forName: testName)
+        return SettingsStore(userDefaults: defaults)
     }
 }
 
-private final class CapturingPosterExporter: PosterExporting {
-    private(set) var copiedScores: [Int] = []
+private final class CapturingPosterRenderer: PosterRendering {
+    let data: Data
+    private(set) var lastPresentation: DailyReportPresentation?
 
-    func generateAndSaveLatestPoster() throws -> URL {
-        URL(fileURLWithPath: "/tmp/mock-poster.png")
+    init(data: Data) {
+        self.data = data
     }
 
-    func generateAndCopyLatestPoster() throws {}
-
-    func generateAndCopyPoster(for record: DailyRecord) throws {
-        copiedScores.append(record.score)
+    func render(report: DailyReportPresentation) throws -> Data {
+        lastPresentation = report
+        return data
     }
+}
+
+private final class StubClipboardWriter: ClipboardWriting {
+    func writeSharePayload(imageData: Data, text: String) {}
 }
