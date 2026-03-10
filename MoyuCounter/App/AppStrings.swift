@@ -70,10 +70,18 @@ enum AppStrings {
 
     enum Report {
         static let sectionTitle = "今日战报"
+        static let surfaceSectionTitle = "时间维度"
+        static let periodScopeSectionTitle = "周期范围"
         static let templateSectionTitle = "分享模板"
+        static let dailySurface = "今日"
+        static let weeklySurface = "本周"
+        static let monthlySurface = "本月"
+        static let currentPeriodScope = "进行中"
+        static let previousPeriodScope = "上一期"
         static let templatePickerHint = "切换模板会立即刷新预览，并用于复制与保存。"
         static let emptyTitle = "今日战报待生成"
         static let emptySubtitle = "完成日结后，这里会展示称号、毒舌判词和今日亮点。"
+        static let periodEmptyTitle = "这个周期还没有纪念卡"
         static let periodEmptySubtitle = "这个周期还没有结算记录。"
         static let standardTemplate = "标准战报"
         static let certificateTemplate = "奖状"
@@ -88,7 +96,7 @@ enum AppStrings {
         static let periodVerdictBalanced = "人类平衡态"
         static let periodVerdictLow = "稳定潜航期"
         static let refreshVerdict = "刷新判词"
-        static let copyReport = "复制今日战报"
+        static let copyReport = "复制战报"
         static let saveReport = "保存战报图片"
     }
 }

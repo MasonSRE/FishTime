@@ -14,12 +14,17 @@ struct MenuBarRootView: View {
 
             TodayReportView(
                 presentation: reportViewModel.presentation,
+                periodPresentation: reportViewModel.periodPresentation,
                 isCompact: true,
+                selectedSurface: reportViewModel.selectedSurface,
+                selectedPeriodScope: reportViewModel.selectedPeriodScope,
                 selectedTemplate: reportViewModel.selectedTemplate,
+                onSelectSurface: reportViewModel.selectSurface,
+                onSelectPeriodScope: reportViewModel.selectPeriodScope,
                 onSelectTemplate: reportViewModel.selectTemplate,
                 onRefreshVerdict: reportViewModel.refreshVerdict,
-                onCopy: viewModel.copyPosterToClipboard,
-                onSave: viewModel.generatePosterAndSave
+                onCopy: reportViewModel.copyCurrentReportToClipboard,
+                onSave: reportViewModel.saveCurrentReport
             )
 
             Divider()

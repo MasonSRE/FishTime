@@ -20,11 +20,16 @@ struct MainWindowView: View {
 
             TodayReportView(
                 presentation: reportViewModel.presentation,
+                periodPresentation: reportViewModel.periodPresentation,
+                selectedSurface: reportViewModel.selectedSurface,
+                selectedPeriodScope: reportViewModel.selectedPeriodScope,
                 selectedTemplate: reportViewModel.selectedTemplate,
+                onSelectSurface: reportViewModel.selectSurface,
+                onSelectPeriodScope: reportViewModel.selectPeriodScope,
                 onSelectTemplate: reportViewModel.selectTemplate,
                 onRefreshVerdict: reportViewModel.refreshVerdict,
-                onCopy: menuBarViewModel.copyPosterToClipboard,
-                onSave: menuBarViewModel.generatePosterAndSave
+                onCopy: reportViewModel.copyCurrentReportToClipboard,
+                onSave: reportViewModel.saveCurrentReport
             )
 
             Divider()

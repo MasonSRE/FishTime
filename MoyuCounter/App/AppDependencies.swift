@@ -35,13 +35,15 @@ final class AppDependencies: ObservableObject {
             repository: repository,
             notifier: notificationService
         )
+        let periodAggregator = PeriodReportAggregator(repository: repository)
+        let periodComposer = PeriodReportComposer()
         let posterExporter = PosterExportService(
             repository: repository,
             renderer: PosterRenderer(),
             periodRenderer: PeriodPosterRenderer(),
             settingsStore: settingsStore,
-            periodAggregator: PeriodReportAggregator(repository: repository),
-            periodComposer: PeriodReportComposer(),
+            periodAggregator: periodAggregator,
+            periodComposer: periodComposer,
             clipboard: SystemClipboardWriter(),
             exportDirectory: Self.makeAppDirectory().appendingPathComponent("exports", isDirectory: true),
             fileManager: .default
@@ -61,7 +63,10 @@ final class AppDependencies: ObservableObject {
         )
         todayReportViewModel = TodayReportViewModel(
             repository: repository,
-            settingsStore: settingsStore
+            settingsStore: settingsStore,
+            periodAggregator: periodAggregator,
+            periodComposer: periodComposer,
+            posterExporter: posterExporter
         )
         notificationService.configure { [windowRouter] in
             windowRouter.openMainWindow()
