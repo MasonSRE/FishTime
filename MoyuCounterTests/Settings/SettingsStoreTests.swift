@@ -19,4 +19,20 @@ final class SettingsStoreTests: XCTestCase {
         let reloaded = SettingsStore(userDefaults: defaults)
         XCTAssertEqual(reloaded.selectedReportTemplate, .certificate)
     }
+
+    func test_report_surface_and_period_scope_default_and_persist() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+
+        let store = SettingsStore(userDefaults: defaults)
+        XCTAssertEqual(store.selectedReportSurface, .daily)
+        XCTAssertEqual(store.selectedPeriodScope, .current)
+
+        store.selectedReportSurface = .monthly
+        store.selectedPeriodScope = .previousCompleted
+
+        let reloaded = SettingsStore(userDefaults: defaults)
+        XCTAssertEqual(reloaded.selectedReportSurface, .monthly)
+        XCTAssertEqual(reloaded.selectedPeriodScope, .previousCompleted)
+    }
 }

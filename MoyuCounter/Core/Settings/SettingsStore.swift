@@ -26,6 +26,18 @@ final class SettingsStore: ObservableObject {
         }
     }
 
+    @Published var selectedReportSurface: ReportSurface {
+        didSet {
+            userDefaults.set(selectedReportSurface.rawValue, forKey: Keys.selectedReportSurface)
+        }
+    }
+
+    @Published var selectedPeriodScope: PeriodReportScope {
+        didSet {
+            userDefaults.set(selectedPeriodScope.rawValue, forKey: Keys.selectedPeriodScope)
+        }
+    }
+
     private let userDefaults: UserDefaults
 
     init(userDefaults: UserDefaults = .standard) {
@@ -49,6 +61,20 @@ final class SettingsStore: ObservableObject {
         } else {
             self.selectedReportTemplate = .standard
         }
+
+        if let rawSurface = userDefaults.string(forKey: Keys.selectedReportSurface),
+           let savedSurface = ReportSurface(rawValue: rawSurface) {
+            self.selectedReportSurface = savedSurface
+        } else {
+            self.selectedReportSurface = .daily
+        }
+
+        if let rawPeriodScope = userDefaults.string(forKey: Keys.selectedPeriodScope),
+           let savedPeriodScope = PeriodReportScope(rawValue: rawPeriodScope) {
+            self.selectedPeriodScope = savedPeriodScope
+        } else {
+            self.selectedPeriodScope = .current
+        }
     }
 }
 
@@ -57,4 +83,6 @@ private enum Keys {
     static let workStartMinutes = "workStartMinutes"
     static let workEndMinutes = "workEndMinutes"
     static let selectedReportTemplate = "selectedReportTemplate"
+    static let selectedReportSurface = "selectedReportSurface"
+    static let selectedPeriodScope = "selectedPeriodScope"
 }
