@@ -38,7 +38,10 @@ final class AppDependencies: ObservableObject {
         let posterExporter = PosterExportService(
             repository: repository,
             renderer: PosterRenderer(),
+            periodRenderer: PeriodPosterRenderer(),
             settingsStore: settingsStore,
+            periodAggregator: PeriodReportAggregator(repository: repository),
+            periodComposer: PeriodReportComposer(),
             clipboard: SystemClipboardWriter(),
             exportDirectory: Self.makeAppDirectory().appendingPathComponent("exports", isDirectory: true),
             fileManager: .default

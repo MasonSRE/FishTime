@@ -93,10 +93,58 @@ final class PosterExportServiceTests: XCTestCase {
         XCTAssertEqual(renderer.lastPresentation?.templateStyle, .deskLog)
     }
 
+    func test_generate_and_copy_period_poster_uses_weekly_snapshot_pipeline() throws {
+        let repository = try DailyRecordRepository.inMemory()
+        try repository.save(
+            DailyRecord(
+                date: makeDate(year: 2026, month: 3, day: 9),
+                score: 68,
+                label: DailyScoreLabel.balancedHuman.rawValue,
+                activeMinutes: 120
+            )
+        )
+
+        let periodRenderer = CapturingPeriodPosterRenderer(data: Data([0xAA]))
+        let clipboard = StubClipboardWriter()
+        let service = PosterExportService(
+            repository: repository,
+            renderer: StubPosterRenderer(data: Data([0x01])),
+            periodRenderer: periodRenderer,
+            settingsStore: makeSettingsStore(testName: #function),
+            composer: DailyReportComposer(randomIndexProvider: { _, _ in 0 }),
+            periodAggregator: PeriodReportAggregator(
+                repository: repository,
+                calendar: Self.utcCalendar,
+                now: { self.makeDate(year: 2026, month: 3, day: 10, hour: 12, minute: 0) }
+            ),
+            periodComposer: PeriodReportComposer(calendar: Self.utcCalendar),
+            clipboard: clipboard,
+            exportDirectory: FileManager.default.temporaryDirectory,
+            fileManager: .default
+        )
+
+        try service.generateAndCopyPeriodPoster(kind: .weekly, scope: .current)
+
+        XCTAssertEqual(periodRenderer.lastPresentation?.kind, .weekly)
+        XCTAssertEqual(clipboard.writtenData, Data([0xAA]))
+    }
+
+    private static let utcCalendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        calendar.firstWeekday = 2
+        calendar.minimumDaysInFirstWeek = 4
+        return calendar
+    }()
+
     private func makeSettingsStore(testName: String) -> SettingsStore {
         let defaults = UserDefaults(suiteName: testName)!
         defaults.removePersistentDomain(forName: testName)
         return SettingsStore(userDefaults: defaults)
+    }
+
+    private func makeDate(year: Int, month: Int, day: Int, hour: Int = 0, minute: Int = 0) -> Date {
+        Self.utcCalendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour, minute: minute))!
     }
 }
 
@@ -123,6 +171,20 @@ private final class CapturingPosterRenderer: PosterRendering {
     }
 
     func render(report: DailyReportPresentation) throws -> Data {
+        lastPresentation = report
+        return data
+    }
+}
+
+private final class CapturingPeriodPosterRenderer: PeriodPosterRendering {
+    let data: Data
+    private(set) var lastPresentation: PeriodReportPresentation?
+
+    init(data: Data) {
+        self.data = data
+    }
+
+    func render(report: PeriodReportPresentation) throws -> Data {
         lastPresentation = report
         return data
     }

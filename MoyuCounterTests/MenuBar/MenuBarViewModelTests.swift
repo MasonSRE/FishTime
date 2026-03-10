@@ -96,4 +96,10 @@ private final class StubPosterExporter: PosterExporting {
     func generateAndCopyLatestPoster() throws {}
 
     func generateAndCopyPoster(for record: DailyRecord) throws {}
+
+    func generateAndSavePeriodPoster(kind: PeriodReportKind, scope: PeriodReportScope) throws -> URL {
+        URL(fileURLWithPath: "/tmp/mock-period-poster.png")
+    }
+
+    func generateAndCopyPeriodPoster(kind: PeriodReportKind, scope: PeriodReportScope) throws {}
 }
