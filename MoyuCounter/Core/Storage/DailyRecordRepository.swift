@@ -28,6 +28,10 @@ final class DailyRecordRepository {
         Array(records.suffix(limit)).reversed()
     }
 
+    func fetchRecords(in interval: DateInterval) throws -> [DailyRecord] {
+        records.filter { interval.contains($0.date) }
+    }
+
     func reset() throws {
         records.removeAll()
         if let fileURL = database.fileURL, FileManager.default.fileExists(atPath: fileURL.path) {
