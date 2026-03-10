@@ -51,4 +51,12 @@ final class HistoryViewModel: ObservableObject {
         guard let record = sourceRecords[row.date] else { return }
         try? posterExporter?.generateAndCopyPoster(for: record)
     }
+
+    func copyPreviousWeeklyReport() {
+        try? posterExporter?.generateAndCopyPeriodPoster(kind: .weekly, scope: .previousCompleted)
+    }
+
+    func copyPreviousMonthlyReport() {
+        try? posterExporter?.generateAndCopyPeriodPoster(kind: .monthly, scope: .previousCompleted)
+    }
 }

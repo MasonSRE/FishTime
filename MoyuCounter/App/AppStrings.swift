@@ -98,5 +98,7 @@ enum AppStrings {
         static let refreshVerdict = "刷新判词"
         static let copyReport = "复制战报"
         static let saveReport = "保存战报图片"
+        static let copyPreviousWeeklyReport = "生成上周纪念卡"
+        static let copyPreviousMonthlyReport = "生成上月纪念卡"
     }
 }
